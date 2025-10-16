@@ -56,6 +56,7 @@ scripts/
   plot_ood_and_calibration.py  # produces PR curves + reliability diagrams
 summary/
   one_page_summary.tex   # 1-page LaTeX summary template
+  colab.ipynb # Interactive notebook (training → evaluation → visualization)
 ```
 
 ##  Citation-ready outputs
