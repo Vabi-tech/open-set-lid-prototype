@@ -15,7 +15,11 @@ LANG_ALIAS = {
     "bn": "ben",
 }
 
-def load_tatoeba(seen_langs: List[str], unseen_langs: List[str], max_per_lang: int = 5000):
+
+def load_tatoeba(
+        seen_langs: List[str],
+        unseen_langs: List[str],
+        max_per_lang: int = 5000):
     """
     Load Tatoeba 'sentences' (text + language) and build splits:
       - train/validation/test from SEEN languages
@@ -45,7 +49,7 @@ def load_tatoeba(seen_langs: List[str], unseen_langs: List[str], max_per_lang: i
     random.seed(13)
     random.shuffle(seen_data)
     n = len(seen_data)
-    n_train, n_val = int(0.8*n), int(0.9*n)
+    n_train, n_val = int(0.8 * n), int(0.9 * n)
     train, val, test = seen_data[:n_train], seen_data[n_train:n_val], seen_data[n_val:]
 
     return {
@@ -55,7 +59,11 @@ def load_tatoeba(seen_langs: List[str], unseen_langs: List[str], max_per_lang: i
         "ood_test": unseen_data
     }, sorted(list(seen_iso))
 
-def load_flores(seen_langs: List[str], unseen_langs: List[str], max_per_lang: int = 2000):
+
+def load_flores(
+        seen_langs: List[str],
+        unseen_langs: List[str],
+        max_per_lang: int = 2000):
     """
     Load FLORES-200 dev set and use text with ISO-639-3 codes.
     """
@@ -83,7 +91,7 @@ def load_flores(seen_langs: List[str], unseen_langs: List[str], max_per_lang: in
     random.seed(13)
     random.shuffle(seen_data)
     n = len(seen_data)
-    n_train, n_val = int(0.8*n), int(0.9*n)
+    n_train, n_val = int(0.8 * n), int(0.9 * n)
     train, val, test = seen_data[:n_train], seen_data[n_train:n_val], seen_data[n_val:]
 
     return {
@@ -93,20 +101,37 @@ def load_flores(seen_langs: List[str], unseen_langs: List[str], max_per_lang: in
         "ood_test": unseen_data
     }, sorted(list(seen_iso))
 
-def get_dataset(name: str, seen_langs: List[str], unseen_langs: List[str], max_per_lang: int = 5000):
+
+def get_dataset(
+        name: str,
+        seen_langs: List[str],
+        unseen_langs: List[str],
+        max_per_lang: int = 5000):
     if name.lower() == "tatoeba":
-        return load_tatoeba(seen_langs, unseen_langs, max_per_lang=max_per_lang)
+        return load_tatoeba(
+            seen_langs,
+            unseen_langs,
+            max_per_lang=max_per_lang)
     elif name.lower() == "flores":
-        return load_flores(seen_langs, unseen_langs, max_per_lang=min(max_per_lang, 2000))
+        return load_flores(
+            seen_langs,
+            unseen_langs,
+            max_per_lang=min(
+                max_per_lang,
+                2000))
     elif name.lower() == "papluca":
-        return load_papluca_langid(seen_langs, unseen_langs, max_per_lang=max_per_lang)
+        return load_papluca_langid(
+            seen_langs,
+            unseen_langs,
+            max_per_lang=max_per_lang)
     else:
         raise ValueError(f"Unknown dataset: {name}")
 
 
-
-
-def load_papluca_langid(seen_langs: List[str], unseen_langs: List[str], max_per_lang: int = 5000):
+def load_papluca_langid(
+        seen_langs: List[str],
+        unseen_langs: List[str],
+        max_per_lang: int = 5000):
     """Load papluca/language-identification and build SEEN/UNSEEN splits.
     Expects columns: 'text' (str) and 'labels' (ISO-639-1 code like 'en').
     """
@@ -138,7 +163,7 @@ def load_papluca_langid(seen_langs: List[str], unseen_langs: List[str], max_per_
     random.seed(13)
     random.shuffle(seen_data)
     n = len(seen_data)
-    n_train, n_val = int(0.8*n), int(0.9*n)
+    n_train, n_val = int(0.8 * n), int(0.9 * n)
     train, val, test = seen_data[:n_train], seen_data[n_train:n_val], seen_data[n_val:]
 
     return {

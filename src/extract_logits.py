@@ -1,16 +1,35 @@
-import argparse, os, json, torch, numpy as np
+import argparse
+import os
+import json
+import torch
+import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModel
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from src.data_io import get_dataset
 
+
 @torch.no_grad()
-def get_logits_and_features(model, feature_model, tokenizer, ds_list, label2id_map=None, batch_size=64, device="cpu"):
+def get_logits_and_features(
+        model,
+        feature_model,
+        tokenizer,
+        ds_list,
+        label2id_map=None,
+        batch_size=64,
+        device="cpu"):
     def to_dl(texts, labels=None):
-        enc = tokenizer(texts, truncation=True, padding="max_length", max_length=128, return_tensors="pt")
+        enc = tokenizer(
+            texts,
+            truncation=True,
+            padding="max_length",
+            max_length=128,
+            return_tensors="pt")
         if labels is None:
-            return DataLoader(list(zip(enc["input_ids"], enc["attention_mask"])), batch_size=batch_size)
-        return DataLoader(list(zip(enc["input_ids"], enc["attention_mask"], labels)), batch_size=batch_size)
+            return DataLoader(
+                list(zip(enc["input_ids"], enc["attention_mask"])), batch_size=batch_size)
+        return DataLoader(list(
+            zip(enc["input_ids"], enc["attention_mask"], labels)), batch_size=batch_size)
 
     out = []
     for split_name, split in ds_list.items():
@@ -25,8 +44,11 @@ def get_logits_and_features(model, feature_model, tokenizer, ds_list, label2id_m
             input_ids = input_ids.to(device)
             attn = attn.to(device)
 
-            logits = model(input_ids=input_ids, attention_mask=attn).logits  # [B, C]
-            feats = feature_model(input_ids=input_ids, attention_mask=attn).last_hidden_state[:,0,:]  # CLS
+            logits = model(
+                input_ids=input_ids,
+                attention_mask=attn).logits  # [B, C]
+            feats = feature_model(
+                input_ids=input_ids, attention_mask=attn).last_hidden_state[:, 0, :]  # CLS
 
             row = {
                 "split": split_name,
@@ -34,7 +56,8 @@ def get_logits_and_features(model, feature_model, tokenizer, ds_list, label2id_m
                 "features": feats.cpu().numpy().tolist()
             }
             if labels is not None:
-                # y is a tuple of labels for this batch; usually strings like "en","fr",...
+                # y is a tuple of labels for this batch; usually strings like
+                # "en","fr",...
                 y_list = list(y)
                 if label2id_map is None:
                     # Fall back to model's config if not provided
@@ -43,6 +66,7 @@ def get_logits_and_features(model, feature_model, tokenizer, ds_list, label2id_m
                 row["label"] = y_ids
             out.append(row)
     return out
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -58,22 +82,28 @@ def main():
     seen = [s.strip() for s in args.seen_langs.split(",") if s.strip()]
     unseen = [s.strip() for s in args.unseen_langs.split(",") if s.strip()]
 
-    data, label_list = get_dataset(args.dataset, seen, unseen, max_per_lang=args.max_per_lang)
+    data, label_list = get_dataset(
+        args.dataset, seen, unseen, max_per_lang=args.max_per_lang)
     tok = AutoTokenizer.from_pretrained(args.model_dir, local_files_only=True)
-    clf = AutoModelForSequenceClassification.from_pretrained(args.model_dir, local_files_only=True).to(device).eval()
-    feat_model = AutoModel.from_pretrained(args.model_dir, local_files_only=True).to(device).eval()
+    clf = AutoModelForSequenceClassification.from_pretrained(
+        args.model_dir, local_files_only=True).to(device).eval()
+    feat_model = AutoModel.from_pretrained(
+        args.model_dir, local_files_only=True).to(device).eval()
 
     ds_list = {
         "seen_test": data["test"],
         "ood_test": data["ood_test"]
     }
 
-    outputs = get_logits_and_features(clf, feat_model, tok, ds_list, label2id_map=getattr(clf.config, "label2id", {}), device=device)
+    outputs = get_logits_and_features(
+        clf, feat_model, tok, ds_list, label2id_map=getattr(
+            clf.config, "label2id", {}), device=device)
     os.makedirs(os.path.dirname(args.out_path), exist_ok=True)
     with open(args.out_path, "w") as f:
         for row in outputs:
             f.write(json.dumps(row) + "\n")
     print("Wrote", args.out_path)
+
 
 if __name__ == "__main__":
     main()

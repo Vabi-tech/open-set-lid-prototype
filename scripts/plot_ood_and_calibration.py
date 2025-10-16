@@ -1,8 +1,12 @@
-import argparse, os, json, numpy as np
+import argparse
+import os
+import json
+import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve, average_precision_score
 from src.ood_scoring import msp, energy, class_stats, mahalanobis, softmax
 from src.calibration import ece
+
 
 def load_jsonl(path):
     rows = []
@@ -10,6 +14,7 @@ def load_jsonl(path):
         for line in f:
             rows.append(json.loads(line))
     return rows
+
 
 def assemble_arrays(rows, num_classes):
     data = {"seen_logits": [], "seen_feats": [], "seen_labels": [],
@@ -26,9 +31,10 @@ def assemble_arrays(rows, num_classes):
             data["ood_logits"].append(logits)
             data["ood_feats"].append(feats)
     for k in data:
-        if len(data[k])>0:
+        if len(data[k]) > 0:
             data[k] = np.concatenate(data[k], axis=0)
     return data
+
 
 def pr_plot(y_true, score, title, out_path):
     precision, recall, _ = precision_recall_curve(y_true, score)
@@ -44,11 +50,12 @@ def pr_plot(y_true, score, title, out_path):
     plt.close()
     return ap
 
+
 def reliability_plot(probs, labels, out_path):
     e, (bins, confs, accs, counts) = ece(probs, labels, n_bins=15)
-    centers = 0.5*(bins[:-1]+bins[1:])
+    centers = 0.5 * (bins[:-1] + bins[1:])
     plt.figure()
-    plt.plot([0,1],[0,1], linestyle="--")
+    plt.plot([0, 1], [0, 1], linestyle="--")
     plt.plot(confs, accs, marker="o")
     plt.xlabel("Confidence")
     plt.ylabel("Accuracy")
@@ -58,6 +65,7 @@ def reliability_plot(probs, labels, out_path):
     plt.close()
     return e
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preds", type=str, required=True)
@@ -66,7 +74,7 @@ def main():
     args = ap.parse_args()
 
     rows = load_jsonl(args.preds)
-    first_seen = next(r for r in rows if r["split"]=="seen_test")
+    first_seen = next(r for r in rows if r["split"] == "seen_test")
     num_classes = args.num_classes or len(first_seen["logits"][0])
 
     data = assemble_arrays(rows, num_classes)
@@ -78,10 +86,12 @@ def main():
     ood_feats = data["ood_feats"]
     y = np.concatenate([np.zeros(len(id_logits)), np.ones(len(ood_logits))])
 
-    msp_id = msp(id_logits); msp_ood = msp(ood_logits)
+    msp_id = msp(id_logits)
+    msp_ood = msp(ood_logits)
     msp_score = np.concatenate([1.0 - msp_id, 1.0 - msp_ood])
 
-    en_id = energy(id_logits); en_ood = energy(ood_logits)
+    en_id = energy(id_logits)
+    en_ood = energy(ood_logits)
     en_score = np.concatenate([en_id, en_ood])
 
     id_labels = data["seen_labels"]
@@ -90,22 +100,45 @@ def main():
     maha_ood = mahalanobis(ood_feats, means, precision)
     maha_score = np.concatenate([maha_id, maha_ood])
 
-    ap_msp = pr_plot(y, msp_score, "PR — OOD (1 - MSP)", os.path.join(args.out_dir, "pr_msp.png"))
-    ap_en  = pr_plot(y, en_score,  "PR — OOD (Energy)", os.path.join(args.out_dir, "pr_energy.png"))
-    ap_ma  = pr_plot(y, maha_score,"PR — OOD (Mahalanobis)", os.path.join(args.out_dir, "pr_mahalanobis.png"))
+    ap_msp = pr_plot(
+        y,
+        msp_score,
+        "PR — OOD (1 - MSP)",
+        os.path.join(
+            args.out_dir,
+            "pr_msp.png"))
+    ap_en = pr_plot(
+        y,
+        en_score,
+        "PR — OOD (Energy)",
+        os.path.join(
+            args.out_dir,
+            "pr_energy.png"))
+    ap_ma = pr_plot(
+        y,
+        maha_score,
+        "PR — OOD (Mahalanobis)",
+        os.path.join(
+            args.out_dir,
+            "pr_mahalanobis.png"))
 
     from src.ood_scoring import softmax
     probs_id = softmax(id_logits, axis=-1)
-    ece_val = reliability_plot(probs_id, id_labels, os.path.join(args.out_dir, "reliability.png"))
+    ece_val = reliability_plot(
+        probs_id, id_labels, os.path.join(
+            args.out_dir, "reliability.png"))
 
     metrics = {
-        "average_precision": {"ood_1_minus_msp": float(ap_msp), "ood_energy": float(ap_en), "ood_mahalanobis": float(ap_ma)},
-        "ece_on_seen_test": float(ece_val)
-    }
+        "average_precision": {
+            "ood_1_minus_msp": float(ap_msp),
+            "ood_energy": float(ap_en),
+            "ood_mahalanobis": float(ap_ma)},
+        "ece_on_seen_test": float(ece_val)}
     with open(os.path.join(args.out_dir, "metrics.json"), "w") as f:
         import json
         json.dump(metrics, f, indent=2)
     print("Saved metrics and plots to", args.out_dir)
+
 
 if __name__ == "__main__":
     main()
