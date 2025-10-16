@@ -2,7 +2,7 @@
 import argparse
 import json
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from datasets import Dataset
 from transformers import (
