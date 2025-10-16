@@ -2,7 +2,6 @@ import argparse
 import os
 import json
 import torch
-import numpy as np
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModel
 from torch.utils.data import DataLoader
 from tqdm import tqdm

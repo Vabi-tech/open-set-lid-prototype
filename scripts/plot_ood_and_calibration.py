@@ -4,7 +4,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve, average_precision_score
-from src.ood_scoring import msp, energy, class_stats, mahalanobis, softmax
+from src.ood_scoring import msp, energy, class_stats, mahalanobis
 from src.calibration import ece
 
 
@@ -53,7 +53,7 @@ def pr_plot(y_true, score, title, out_path):
 
 def reliability_plot(probs, labels, out_path):
     e, (bins, confs, accs, counts) = ece(probs, labels, n_bins=15)
-    centers = 0.5 * (bins[:-1] + bins[1:])
+    0.5 * (bins[:-1] + bins[1:])
     plt.figure()
     plt.plot([0, 1], [0, 1], linestyle="--")
     plt.plot(confs, accs, marker="o")

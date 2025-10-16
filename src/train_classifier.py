@@ -1,7 +1,6 @@
 import argparse
 import os
 import json
-from typing import List
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 from sklearn.metrics import accuracy_score, f1_score
@@ -20,8 +19,7 @@ def build_hf(ds_split, label_list):
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    import numpy as np
-    preds = logits.argmax(axis=-1)
+        preds = logits.argmax(axis=-1)
     acc = accuracy_score(labels, preds)
     f1 = f1_score(labels, preds, average="macro")
     return {"accuracy": acc, "f1_macro": f1}
