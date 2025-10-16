@@ -1,0 +1,31 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=1.7cm]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\pagenumbering{gobble}
+\setlength{\parskip}{4pt}
+
+\begin{document}
+
+\textbf{Open-Set Detection Prototype --- Multilingual LID}
+
+\textbf{Objective.} Train a multilingual language identification (LID) classifier on \emph{seen} languages and evaluate detection of \emph{unseen} languages using confidence- and feature-based scores.
+
+\textbf{Model/Dataset.} DistilBERT (mCased) fine-tuned on Tatoeba or FLORES-200. SEEN (e.g., en, es, de, fr, it). UNSEEN (e.g., pt, ru, sv).
+
+\textbf{Scores.} Max Softmax Probability (MSP); Energy Score; Mahalanobis distance on penultimate features.
+
+\textbf{Evaluation.} PR curves for OOD detection; calibration on ID test (reliability diagram, ECE).
+
+\textbf{Results (placeholders).} AP (1--MSP): \textbf{0.XX}; AP (Energy): \textbf{0.XX}; AP (Mahalanobis): \textbf{0.XX}. ECE (ID test): \textbf{0.XX}.
+
+\begin{center}
+\includegraphics[width=0.47\linewidth]{../outputs/pr_energy.png}
+\hfill
+\includegraphics[width=0.47\linewidth]{../outputs/reliability.png}
+\end{center}
+
+\noindent \textbf{Repo:} \url{<your\_github\_repo\_url>} \hfill \textbf{Date:} \today
+
+\end{document}
