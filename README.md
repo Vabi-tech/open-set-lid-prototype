@@ -1,9 +1,14 @@
+[![Build Status](https://github.com/Vabi-tech/open-set-lid-prototype/actions/workflows/lint.yml/badge.svg)](https://github.com/Vabi-tech/open-set-lid-prototype/actions)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
+https://colab.research.google.com/github/Vabi-tech/open-set-lid-prototype/blob/main/colab.ipynb)
+
+
 # Open-Set Detection Prototype — Multilingual Language Identification (Text)
 
 This repo is a **minimal, reproducible prototype** for **open-set detection** in multilingual language identification (LID).
 It trains a text classifier on a subset of languages (SEEN), then evaluates on **unseen languages (OOD)** and computes **confidence-based** and **feature-based** detection scores.
 
-## ✨ Methods Included
+##  Methods Included
 - **Model**: `distilbert-base-multilingual-cased` (Hugging Face)
 - **Dataset**: Tatoeba (or FLORES-200) via `datasets` (switchable)
 - **Scores**:
@@ -16,7 +21,7 @@ It trains a text classifier on a subset of languages (SEEN), then evaluates on *
 
 > Note: You’ll need internet access on first run to download the model/dataset.
 
-## 🧪 Quickstart
+##  Quickstart
 
 ```bash
 # 1) Create environment
@@ -36,10 +41,10 @@ python src/extract_logits.py \  --dataset tatoeba \  --model_dir models/lid-seen
 python scripts/plot_ood_and_calibration.py \  --preds outputs/preds.jsonl \  --out_dir outputs
 ```
 
-## 🔧 Switching datasets
+##  Switching datasets
 - For FLORES-200, pass `--dataset flores`. See `src/datasets.py` for details.
 
-## 📁 Repo layout
+##  Repo layout
 ```
 src/
   datasets.py            # dataset loaders (Tatoeba, FLORES)
@@ -53,9 +58,15 @@ summary/
   one_page_summary.tex   # 1-page LaTeX summary template
 ```
 
-## 📝 Citation-ready outputs
+##  Citation-ready outputs
 The `outputs/` folder will contain:
 - `pr_energy.png`, `pr_msp.png`, `pr_mahalanobis.png`
 - `reliability.png` — calibration plot
 - `metrics.json` — AP, ECE, etc.
 - `summary.pdf` — (optional) compiled 1-page summary (fill `summary/one_page_summary.tex`)
+
+## Continuous Integration
+This repository is verified via GitHub Actions (`flake8` lint) — ensuring every commit passes automated quality checks.
+
+## Colab Notebook
+A ready-to-run notebook (`colab.ipynb`) reproduces the training, extraction, and reliability plots in under 10 minutes on GPU.
