@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17373616.svg)](https://doi.org/10.5281/zenodo.17373616)
 [![Build Status](https://github.com/Vabi-tech/open-set-lid-prototype/actions/workflows/lint.yml/badge.svg)](https://github.com/Vabi-tech/open-set-lid-prototype/actions)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
 https://colab.research.google.com/github/Vabi-tech/open-set-lid-prototype/blob/main/colab.ipynb)
